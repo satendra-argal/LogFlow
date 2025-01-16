@@ -1,0 +1,46 @@
+version: '3.7'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: flask-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=development
+      - DATABASE_URI=postgresql://postgres:root@postgres-db:5432/LogFlow_database
+    depends_on:
+      - db
+    networks:
+      - logflow-network
+    command: flask run --host=0.0.0.0 --port=5000
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: react-frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - logflow-network
+
+  db:
+    image: postgres:latest
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: LogFlow_database
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - logflow-network
+
+volumes:
+  postgres-data:
+
+networks:
+  logflow-network:
+    driver: bridge
